@@ -5,6 +5,6 @@ import java.util.Objects
 
 sealed class MainState{
     data object Loading: MainState()
-    data class Success(var user: ResponseMakeBoardDto) : MainState()
+    data object Success : MainState()
     data object Error: MainState()
 }

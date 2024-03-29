@@ -23,13 +23,37 @@ class MainViewModel @Inject constructor(
 
     fun submitData(title: String, content: String, writerId: Int) {
         viewModelScope.launch {
-            authRepository.makeBoard(title, content, writerId).onSuccess { response ->
+            try{
+                val response=authRepository.makeBoard(title,content,writerId)
+                if(response.isSuccess)
+                _mainState.value=MainState.Success
+                else{
+                    response.recoverCatching {
+                        if(it is HttpException){
+                            val data=it.response()?.errorBody()?.byteString()?.toString()
+                            val errorBody = data?.substringAfter("message")
+                            if (errorBody != null) {
+                                Log.e("error", "mesage${errorBody}")
+                            }
+                            _mainState.value=MainState.Error
+                        }
+                    }
+                }
+            } catch (e:HttpException){
+                val data=e.response()?.errorBody()?.byteString()?.toString()
+                val errorBody = data?.substringAfter("message")
+                if (errorBody != null) {
+                    Log.e("error", errorBody)
+                }
+                _mainState.value=MainState.Error
+            }
+            /*authRepository.makeBoard(title, content, writerId).onSuccess { response ->
                 _mainState.value = MainState.Success(response)
                 Log.d("Success", "Success")
             }.onFailure {
                 _mainState.value = MainState.Error
                 Log.e("Failure", "Failed due to: ${it.message}", it)
-            }
+            }*/
         }
     }
 }
