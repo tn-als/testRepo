@@ -1,6 +1,7 @@
-/*
 package com.example.boardex.di
 
+import com.example.boardex.data.datasource.AuthDataSource
+import com.example.boardex.data.datasourceImpl.AuthDataSourceImpl
 import com.example.boardex.data.repositoryImpl.AuthRepositoryImpl
 import com.example.boardex.domain.repository.AuthRepository
 import dagger.Binds
@@ -15,5 +16,8 @@ abstract class BindModule {
     @Binds
     @Singleton
     abstract fun bindAuthRepository(authRepositoryImpl: AuthRepositoryImpl): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun provideAuthDataSource(authDataSourceImpl: AuthDataSourceImpl): AuthDataSource
 }
-*/

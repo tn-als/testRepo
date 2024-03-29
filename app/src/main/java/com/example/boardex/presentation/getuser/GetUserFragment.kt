@@ -2,7 +2,6 @@ package com.example.boardex.presentation.getuser
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +16,7 @@ import com.example.boardex.presentation.FragmentChangeListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class GetUserFragment : Fragment() {
     private var _binding: FragmentGetuserBinding? = null
     private val binding: FragmentGetuserBinding
@@ -59,7 +59,6 @@ class GetUserFragment : Fragment() {
     private fun submit() {
         binding.btnSubmit.setOnClickListener {
             val id = binding.etId.text.toString().toInt()
-            val activityRef = activity
             getUserViewModel.getUser(id)
             lifecycleScope.launch {
                 getUserViewModel.getState.collect { uiState ->

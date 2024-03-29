@@ -22,36 +22,53 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RetrofitModule {
-    private const val APPLICATION_JSON = "application/json"
-
     @Provides
     @Singleton
-    fun provideJson(): Json = Json {
-        ignoreUnknownKeys = true
-        prettyPrint = true
+    fun provideOkHttpClient(
+        interceptor: HttpLoggingInterceptor,
+    ): OkHttpClient {
+        return OkHttpClient.Builder().addInterceptor(interceptor)
+            .connectTimeout(100, TimeUnit.SECONDS).readTimeout(100, TimeUnit.SECONDS)
+            .writeTimeout(100, TimeUnit.SECONDS).build()
     }
 
     @Provides
     @Singleton
-    fun provideJsonConverter(json: Json): Converter.Factory =
-        json.asConverterFactory(APPLICATION_JSON.toMediaType())
+    fun provideLoggingInterceptor(): HttpLoggingInterceptor {
+        val loggingInterceptor = HttpLoggingInterceptor { message ->
+            when {
+                message.isJsonObject() ->
+                    Timber.tag("okhttp").d(JSONObject(message).toString(4))
+
+                message.isJsonArray() ->
+                    Timber.tag("okhttp").d(JSONObject(message).toString(4))
+
+                else -> {
+                    Timber.tag("okhttp").d("CONNECTION INFO -> $message")
+                }
+            }
+        }
+        loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+        return loggingInterceptor
+    }
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(
-        loggingInterceptor: Interceptor,
-    ): OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor(loggingInterceptor)
-        .build()
-
-    @Provides
-    @Singleton
-    fun provideRetrofit(
+    fun provideAuthRetrofit(
+        jsonConverter: Converter.Factory,
         client: OkHttpClient,
-        factory: Converter.Factory,
-    ): Retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .client(client)
-        .addConverterFactory(factory)
-        .build()
+    ): Retrofit {
+        return Retrofit.Builder().baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(jsonConverter).client(client).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideJsonConverterFactory(): Converter.Factory {
+        return Json.asConverterFactory("application/json".toMediaType())
+    }
 }
+
+fun String?.isJsonObject(): Boolean = this?.startsWith("{") == true && this.endsWith("}")
+fun String?.isJsonArray(): Boolean = this?.startsWith("[") == true && this.endsWith("]")
+
