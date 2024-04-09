@@ -5,13 +5,19 @@ import kotlinx.serialization.Serializable
 import retrofit2.http.Body
 
 @Serializable
-data class ResponseMakeBoardDto<T>(
-    @SerialName("isSuccess")
-    val isSuccess:Boolean,
-    @SerialName("code")
-    val code: String,
+data class ResponseMakeBoardDto(
+    @SerialName("success")
+    val success: Boolean,
+    @SerialName("status")
+    val status: String,
     @SerialName("message")
     val message: String,
-    @SerialName("data")
-    val data: T
+   /* @SerialName("data")
+    val data: T*/
 )
+
+fun ResponseMakeBoardDto.handleResponse() {
+    if (!success) {
+        println(message)
+    }
+}

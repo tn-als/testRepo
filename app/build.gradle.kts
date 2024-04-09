@@ -27,6 +27,12 @@ android {
             "BASE_URL",
             gradleLocalProperties(rootDir, providers).getProperty("base.url")
         )
+
+        buildConfigField(
+            "String",
+            "BASEE_URL",
+            gradleLocalProperties(rootDir, providers).getProperty("basee.url")
+        )
     }
 
     buildTypes {
